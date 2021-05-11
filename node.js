@@ -23,7 +23,9 @@ const startPage = () => {
     connection.query(query, (err, res) => {
         if (err) throw err
         console.log('--------------------');
-        console.table(res)})
+        const table = cTable.getTable(res);
+        console.log(table);
+    })
         
 }
 
@@ -32,8 +34,7 @@ const startPage = () => {
     
 
 
-const start = async () => {
-    await startPage(); 
+const start = () => {
     inquirer
         .prompt({
             name: 'start',
@@ -46,7 +47,6 @@ const start = async () => {
                 'Add a Department',
                 'Add a Role',
                 'Add a New Employee',
-                'Update an Employees Role',
                 'Quit'
             ],
         })
@@ -63,15 +63,12 @@ const start = async () => {
                     break;
                 case 'Add a Department':
                     addDepartment()
-                    break;3
+                    break;
                 case 'Add a Role':
                     addRole()
                     break;
                 case 'Add a New Employee':
                     addNewEmployee()
-                    break;
-                case 'Update an Employees Role':
-                    updateRole()
                     break;
                 case 'Quit':
                     quit()
@@ -80,32 +77,43 @@ const start = async () => {
                     console.log('please choose a value')
             }
         })
-
+    }
 
         const viewEmployees = () => {
-            //employees table
-            //loop through employees [i]=template literal injection
             const query = 
             'SELECT * FROM employee';
             connection.query(query, (err, res) => {
                 if (err) throw err
-                console.table(res)})
+                console.log('--------------------');
+                const table = cTable.getTable(res);
+                console.log(table);
                 start();
-        }
+            })
+        };
             
         
 
         const viewEmployeesByDepartment = () => {
+            let query = 
+            'SELECT first_name, last_name, title, name FROM employee LEFT JOIN role ON employee.role_id = role.id LEFT JOIN department on role.department_id = department.id'
+            connection.query(query, (err, res) => {
+                console.log('--------------------');
+                const table = cTable.getTable(res);
+                console.log(table);
+                start();
+            })
         }
 
         const viewEmployeesByRole = () => {
             let query = 
-            'SELECT first_name, last_name, title, salary, FROM employee LEFT JOIN role ON employee.role_id = role.id';
+            'SELECT first_name, last_name, title, salary FROM role RIGHT JOIN employee ON role.id = employee.role_id';
             connection.query(query, (err, res) => {
                 if (err) throw err
-                console.log(err)
-                console.table(res)})
+                console.log('--------------------');
+                const table = cTable.getTable(res);
+                console.log(table);
                 start();
+            })
         }
 
         const addDepartment = () => {
@@ -121,7 +129,7 @@ const start = async () => {
                 connection.query(
                     'INSERT INTO department SET ?',
                     {
-                        department: answer.addDept,
+                        name: answer.addDept,
                     },
                     (err) => {
                         if (err) throw err;
@@ -145,6 +153,11 @@ const start = async () => {
                     name:'addSalary',
                     type:'input',
                     message:'Type in a value for the salary of this role'
+                },
+                {
+                    name:'addDeptId',
+                    type:'input',
+                    message:'What is the value of the department Id for the role?'
                 }
             ])
             .then((answer) => {
@@ -153,6 +166,7 @@ const start = async () => {
                     {
                         title: answer.addTitle,
                         salary: answer.addSalary,
+                        department_id: answer.addDeptId,
                     },
                     (err) => {
                         if (err) throw err;
@@ -181,11 +195,11 @@ const start = async () => {
                     type:'input',
                     message:'What is the role id for the new employee?'
                 },
-                {
-                    name:'employeeManager',
-                    type:'input',
-                    message:'What is the manager id for the manager of this employee?'
-                }
+                // {
+                //     name:'employeeManager',
+                //     type:'input',
+                //     message:'What is the manager id for the manager of this employee?'
+                // }
             ])
             .then((answer) => {
                 connection.query(
@@ -204,69 +218,15 @@ const start = async () => {
                 );
             });
         };
-        }
-
-        const updateRole = () => {
-            const allEmployees = [];
-            connection.query (
-                'SELECT first_name, last_name, id FROM employee', (err, res) => {
-                    if (err) throw err;
-                    console.log(res);
-                    res.forEach(({id, first_name, last_name}) => {
-                        allEmployees.push(id+ '. ' + first_name + ' ' + last_name)
-                    })
-                    inquirer
-            .prompt([
-                {
-                    name:'chooseEmployee',
-                    type:'list',
-                    message:'Select the employee.',
-                    choices: allEmployees,
-                },
-                {
-                    name:'updateTitle',
-                    type:'input',
-                    message:'Type in the title of the new role for the employee.'
-                },
-                {
-                    name:'updateSalary',
-                    type:'input',
-                    message:'Type in a value for the new salary of the employee'
-                },
-                {
-                    name:'updateDeparmentId',
-                    type:'input',
-                    message:'What is the department ID?'
-                }
-            ])
-            .then((answer) => {
-                connection.query(
-                    'UPDATE role SET ? WHERE id=?',
-                    [{
-                        title: answer.updateTitle,
-                        salary: answer.updateSalary,
-                        department_id: answer.updateDepartmentId, 
-                    },
-                    
-                    ],
-                    (err) => {
-                        if (err) throw err;
-                        console.log('New role created successfully.');
-                        start();
-                    }
-                );
-            });
-                }
-            ) 
-        }
 
         const quit = () => {
-            return
+            process.exit()
         }
 
 connection.connect((err) => {
     if (err) throw err;
     console.log(`connected as id ${connection.threadId}\n`);
+    startPage();
     start();
     });
 
