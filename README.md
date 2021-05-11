@@ -1,16 +1,16 @@
-# 12-MySQL-Employee-Tracker# Unit 12 MySQL Homework: Employee Tracker
+# 12-MySQL-Employee-Tracker
 
 ---
 
-title: 11 Express.js: Note Taker
+title: 12-MySQL-Employee-Tracker
 
-description: Web Browser Note Taking App
+description: Command Prompt Employee Tracker Application
 
 author: Jacob Studer
 
-created:  2021 Apr 28
+created:  2021 May 5
 
-modified: 2021 May 2
+modified: 2021 May 11
 
 ---
 
