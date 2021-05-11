@@ -22,6 +22,7 @@ const startPage = () => {
         'SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT JOIN role on employee.role_id = role.id LEFT JOIN department on role.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id;'
     connection.query(query, (err, res) => {
         if (err) throw err
+        console.log('--------------------');
         console.table(res)})
         
 }
@@ -62,7 +63,7 @@ const start = async () => {
                     break;
                 case 'Add a Department':
                     addDepartment()
-                    break;
+                    break;3
                 case 'Add a Role':
                     addRole()
                     break;
@@ -87,36 +88,50 @@ const start = async () => {
             const query = 
             'SELECT * FROM employee';
             connection.query(query, (err, res) => {
-                res.forEach(({id, first_name, last_name, role_id, manager_id}, i) => {
-                    const num = i + 1
-                    const table = cTable.getTable([
-                        `{
-                            id: ${id[num]},
-                            first_name: ${first_name[num]},
-                            last_name: ${last_name[num]},
-                            role: ${role_id[num]},
-                            manager: ${manager_id[num]}
-                        }` 
-                    ]);
-                    console.log(table);
-                })
-                
-            })
-            
+                if (err) throw err
+                console.table(res)})
+                start();
         }
+            
+        
 
         const viewEmployeesByDepartment = () => {
-            let query = 
-            'SELECT department.name'
         }
 
         const viewEmployeesByRole = () => {
-            //query join of employees and role table
+            let query = 
+            'SELECT first_name, last_name, title, salary, FROM employee LEFT JOIN role ON employee.role_id = role.id';
+            connection.query(query, (err, res) => {
+                if (err) throw err
+                console.log(err)
+                console.table(res)})
+                start();
         }
 
         const addDepartment = () => {
-            
-        }
+            inquirer
+            .prompt([
+                {
+                    name:'addDept',
+                    type:'input',
+                    message:'Type in a value for the department you would like to add.'
+                },
+            ])
+            .then((answer) => {
+                connection.query(
+                    'INSERT INTO department SET ?',
+                    {
+                        department: answer.addDept,
+                    },
+                    (err) => {
+                        if (err) throw err;
+                        console.log('New department created successfully.');
+                        start();
+                    }
+                );
+            });
+        };
+        
 
         const addRole = () => {
             inquirer
@@ -243,6 +258,10 @@ const start = async () => {
             });
                 }
             ) 
+        }
+
+        const quit = () => {
+            return
         }
 
 connection.connect((err) => {
