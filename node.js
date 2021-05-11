@@ -195,11 +195,7 @@ const start = () => {
                     type:'input',
                     message:'What is the role id for the new employee?'
                 },
-                // {
-                //     name:'employeeManager',
-                //     type:'input',
-                //     message:'What is the manager id for the manager of this employee?'
-                // }
+                
             ])
             .then((answer) => {
                 connection.query(
